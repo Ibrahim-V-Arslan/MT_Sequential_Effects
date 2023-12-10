@@ -5,11 +5,13 @@ Created on Tue Nov  7 10:35:01 2023
 @author: veoni
 """
 
+
+
 import pandas as pd
 from pseudo_color import mypseudorandrange
 #from Trials import max_trial
-training_trial = 40
-max_trial = 400
+training_trial = 8
+max_trial = 16
 
 #First creating input csv for EXPERIMENT
 
@@ -24,7 +26,7 @@ training_easy_red_values = mypseudorandrange(.545, .1, 8, .001, .001, .1, .9, in
 # For Blue you will do 1 - value above 
 
 #Medium Condition Generator
-training_medium_red_values = mypseudorandrange(.530, .1, 8, .001, .001, .1, .9, int(max_trial/4))
+training_medium_red_values = mypseudorandrange(.53, .1, 8, .001, .001, .1, .9, int(max_trial/4))
 
 # For Blue you will do 1 - value above 
 
@@ -53,7 +55,7 @@ for z in range((max_trial//4)):
     circle_6.append(training_control_values[z][5])
     circle_7.append(training_control_values[z][6])
     circle_8.append(training_control_values[z][7])
-    
+for z in range((max_trial//4)):    
     circle_1.append(training_easy_red_values[z][0])
     circle_2.append(training_easy_red_values[z][1])
     circle_3.append(training_easy_red_values[z][2])
@@ -62,7 +64,7 @@ for z in range((max_trial//4)):
     circle_6.append(training_easy_red_values[z][5])
     circle_7.append(training_easy_red_values[z][6])
     circle_8.append(training_easy_red_values[z][7])
-    
+for z in range((max_trial//4)):    
     circle_1.append(training_medium_red_values[z][0])
     circle_2.append(training_medium_red_values[z][1])
     circle_3.append(training_medium_red_values[z][2])
@@ -71,7 +73,7 @@ for z in range((max_trial//4)):
     circle_6.append(training_medium_red_values[z][5])
     circle_7.append(training_medium_red_values[z][6])
     circle_8.append(training_medium_red_values[z][7])
-    
+for z in range((max_trial//4)):    
     circle_1.append(training_hard_red_values[z][0])
     circle_2.append(training_hard_red_values[z][1])
     circle_3.append(training_hard_red_values[z][2])
@@ -268,10 +270,31 @@ experiment_df["RGB_6"] = rgb_6
 experiment_df["RGB_7"] = rgb_7
 experiment_df["RGB_8"] = rgb_8
 
+c_value = []
+for i in range(len(experiment_df)):
+    if experiment_df["Stimulus Color"].iloc[i] == "Control":
+        c_value.append(.5)
+    elif experiment_df["Stimulus Color"].iloc[i] == "Red":
+        if experiment_df["Condition"].iloc[i] == "Easy":
+            c_value.append(.545)
+        elif experiment_df["Condition"].iloc[i] == "Medium":
+            c_value.append(.530)
+        elif experiment_df["Condition"].iloc[i] == "Hard":
+            c_value.append(.52)
+    elif experiment_df["Stimulus Color"].iloc[i] == "Blue":
+        if experiment_df["Condition"].iloc[i] == "Easy":
+            c_value.append((1-.545))
+        elif experiment_df["Condition"].iloc[i] == "Medium":
+            c_value.append((1-.530))
+        elif experiment_df["Condition"].iloc[i] == "Hard":
+            c_value.append((1-.52))
+experiment_df["c_value"] = c_value
 experiment_df = experiment_df.sample(frac = 1)
-#experiment_df.to_csv("Input_dataset.csv")
+#experiment_df.to_excel("Input_dataset.xlsx")
 
 
+    
+    
 
 
 
@@ -318,7 +341,7 @@ for z in range((training_trial//2)):
     circle_6.append(training_easy_red_values[z][5])
     circle_7.append(training_easy_red_values[z][6])
     circle_8.append(training_easy_red_values[z][7])
-    
+for z in range((training_trial//2)):    
     circle_1.append(training_medium_red_values[z][0])
     circle_2.append(training_medium_red_values[z][1])
     circle_3.append(training_medium_red_values[z][2])
@@ -507,6 +530,25 @@ training_df["RGB_6"] = rgb_6
 training_df["RGB_7"] = rgb_7
 training_df["RGB_8"] = rgb_8
 
+c_value = []
+for i in range(len(training_df)):
+    if training_df["Stimulus Color"].iloc[i] == "Control":
+        c_value.append(.5)
+    elif training_df["Stimulus Color"].iloc[i] == "Red":
+        if training_df["Condition"].iloc[i] == "Easy":
+            c_value.append(.545)
+        elif training_df["Condition"].iloc[i] == "Medium":
+            c_value.append(.530)
+        elif training_df["Condition"].iloc[i] == "Hard":
+            c_value.append(.52)
+    elif training_df["Stimulus Color"].iloc[i] == "Blue":
+        if training_df["Condition"].iloc[i] == "Easy":
+            c_value.append((1-.545))
+        elif training_df["Condition"].iloc[i] == "Medium":
+            c_value.append((1-.530))
+        elif training_df["Condition"].iloc[i] == "Hard":
+            c_value.append((1-.52))
+training_df["c_value"] = c_value
 training_df = training_df.sample(frac = 1)
 #training_df.to_csv("Input_dataset.csv")
         

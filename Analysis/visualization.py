@@ -10,14 +10,14 @@ import matplotlib.pyplot as plt
 # Assuming you have recorded mouse positions in the list `mouse_positions`
 
 # Extract x and y coordinates from mouse_positions
-x_coords = [pos[0] for pos in out_dict['traj_record'][1]]
-y_coords = [pos[1] for pos in out_dict['traj_record'][1]]
+x_coords = [pos[0] for pos in out_dict['traj_record'][0]]
+y_coords = [pos[1] for pos in out_dict['traj_record'][0]]
 
 # Create a new figure
 plt.figure(figsize=(8, 6))
 
 # Plot the mouse trajectory
-plt.plot(x_coords, y_coords, label='Mouse Trajectory', color='blue')
+#plt.plot(x_coords, y_coords, label='Mouse Trajectory', color='blue')
 plt.scatter(x_coords, y_coords, color='red', s=4, label='Mouse Positions')
 plt.hlines(-108, xmin = -800 , xmax =800, colors= 'orange')
 
