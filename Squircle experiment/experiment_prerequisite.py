@@ -10,8 +10,8 @@ Created on Tue Nov  7 10:35:01 2023
 import pandas as pd
 from pseudo_color import mypseudorandrange
 #from Trials import max_trial
-training_trial = 40
-max_trial = 960
+training_trial = 4
+max_trial = 16
 
 #First creating input csv for EXPERIMENT
 

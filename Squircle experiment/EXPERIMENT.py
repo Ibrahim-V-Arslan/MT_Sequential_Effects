@@ -15,6 +15,7 @@ import pandas as pd
 from psychopy.event import Mouse
 from experiment_prerequisite import experiment_df, training_df, training_trial, max_trial
 import math
+import pickle
 
 
 # Constants
@@ -430,6 +431,7 @@ win.close()
 out_df = pd.DataFrame.from_dict(out_dict)
 out_df.to_excel(f'./data/results_{pt_num[0]}.xlsx', index=False)
 experiment_df.to_excel(f'./data/input_dataset_{pt_num[0]}.xlsx')
+out_df.to_pickle(f'./data/results_{pt_num[0]}.pkl')
 
 # Quit
 core.quit()
