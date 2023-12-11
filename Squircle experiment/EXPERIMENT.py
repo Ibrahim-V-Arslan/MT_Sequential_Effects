@@ -32,7 +32,7 @@ overall_time = core.Clock()
 # Variables
 variables = [
     'pt_num', 'Age', 'Gender', 'Handedness', 'trial_nbr', 'block_number',
-    'traj_record', 'traj_timestamp', 'rt', 'acc', 'choice', 'true_value', 'difficulty', 'c_value', 'Experiment Duration',
+    'traj_record', 'traj_timestamp', 'stim_traj', 'rt', 'acc', 'choice', 'true_value', 'difficulty', 'c_value', 'Experiment Duration',
 ]
 
 # Create an empty dictionary for output
@@ -134,6 +134,7 @@ for i in range(training_trial):
     out_dict['c_value'].append(round(training_df['c_value'].iloc[i],3))
     mouse_positions = []
     trajectory_timestamp = []
+    traj_stim_on = []
     shown = False
 
     # Reset the mouse position and variables for each trial
@@ -163,6 +164,8 @@ for i in range(training_trial):
                 core.wait(0.001)
                 mouse_positions.append((int(mouse.getPos()[0]),int(mouse.getPos()[1])))
                 trajectory_timestamp.append(trial_timing.getTime())
+                traj_stim_on.append(mouse_positions[-1])
+                
             win.flip()
             shown = True
             #rt = core.Clock() was here before
@@ -177,7 +180,9 @@ for i in range(training_trial):
                 out_dict['true_value'].append(training_df["Stimulus Color"].iloc[i])
                 out_dict["difficulty"].append(training_df["Condition"].iloc[i])
                 out_dict['acc'].append('NAN')
-                out_dict['traj_record'].append('NAN')
+                out_dict['traj_record'].append(mouse_positions)
+                out_dict['traj_timestamp'].append(trajectory_timestamp)
+                out_dict['stim_traj'].append(traj_stim_on)
                 break
         # Stop the trial when red pill boundary is reached
         
@@ -188,6 +193,7 @@ for i in range(training_trial):
             out_dict['true_value'].append(training_df["Stimulus Color"].iloc[i])
             out_dict["difficulty"].append(training_df["Condition"].iloc[i])
             out_dict['traj_timestamp'].append(trajectory_timestamp)
+            out_dict['stim_traj'].append(traj_stim_on)
 
             if training_df["Stimulus Color"].iloc[i] == choice:
                 out_dict['acc'].append(True)
@@ -221,6 +227,7 @@ for i in range(training_trial):
             out_dict['true_value'].append(training_df["Stimulus Color"].iloc[i])
             out_dict["difficulty"].append(training_df["Condition"].iloc[i])
             out_dict['traj_timestamp'].append(trajectory_timestamp)
+            out_dict['stim_traj'].append(traj_stim_on)
 
             if training_df["Stimulus Color"].iloc[i] == choice:
                 out_dict['acc'].append(True)
@@ -244,7 +251,7 @@ for i in range(training_trial):
                 if -15 <= x <= 15 and -465 <= y <= -435:
                     returned = True
             break
-        out_dict['Experiment Duration'].append(overall_time.getTime()) 
+    out_dict['Experiment Duration'].append(overall_time.getTime()) 
     
 horizon.autoDraw = False
 training = False
@@ -303,6 +310,8 @@ for i in range(max_trial):
     # Set up trial
     out_dict['trial_nbr'].append(i + 1)
     mouse_positions = []
+    traj_stim_on = []
+    trajectory_timestamp = []
     shown = False
 
     # Reset the mouse position and variables for each trial
@@ -333,6 +342,7 @@ for i in range(max_trial):
                 core.wait(0.001)
                 mouse_positions.append((int(mouse.getPos()[0]),int(mouse.getPos()[1])))
                 trajectory_timestamp.append(trial_timing.getTime())
+                traj_stim_on.append(mouse_positions[-1])
             win.flip()
             shown = True
             rt = core.Clock()
@@ -347,8 +357,9 @@ for i in range(max_trial):
                 out_dict['true_value'].append(experiment_df["Stimulus Color"].iloc[i])
                 out_dict["difficulty"].append(experiment_df["Condition"].iloc[i])
                 out_dict['acc'].append('NAN')
-                out_dict['traj_record'].append('NAN')
+                out_dict['traj_record'].append(mouse_positions)
                 out_dict['traj_timestamp'].append(trajectory_timestamp)
+                out_dict['stim_traj'].append(traj_stim_on)
                 break
         # Stop the trial when red pill boundary is reached
         if y >= 390 and x >= 810:
@@ -358,6 +369,7 @@ for i in range(max_trial):
             out_dict['true_value'].append(experiment_df["Stimulus Color"].iloc[i])
             out_dict["difficulty"].append(experiment_df["Condition"].iloc[i])
             out_dict['traj_timestamp'].append(trajectory_timestamp)
+            out_dict['stim_traj'].append(traj_stim_on)
 
             if experiment_df["Stimulus Color"].iloc[i] == choice:
                 out_dict['acc'].append(True)
@@ -386,6 +398,7 @@ for i in range(max_trial):
             out_dict['true_value'].append(experiment_df["Stimulus Color"].iloc[i])
             out_dict["difficulty"].append(experiment_df["Condition"].iloc[i])
             out_dict['traj_timestamp'].append(trajectory_timestamp)
+            out_dict['stim_traj'].append(traj_stim_on)
 
             if experiment_df["Stimulus Color"].iloc[i] == choice:
                 out_dict['acc'].append(True)
