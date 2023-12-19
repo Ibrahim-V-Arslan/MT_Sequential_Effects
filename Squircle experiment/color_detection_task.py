@@ -188,7 +188,7 @@ while training == True:
             y_p.append(mouse.getPos()[1])
             x_p.append(mouse.getPos()[0])
             if len(y_p) >= 100:
-                if np.std(y_p[-100:-1]) < 10 and np.std(x_p[-100:-1]) < 10:
+                if np.std(y_p[-100:-1]) < 0.1 and np.std(x_p[-100:-1]) < 0.1:
                     stopped = True
                 
             if shown == True:
@@ -378,7 +378,7 @@ for i in range(max_trial):
         y_p.append(mouse.getPos()[1])
         x_p.append(mouse.getPos()[0])
         if len(y_p) >= 100:
-            if np.std(y_p[-100:-1]) < 10 and np.std(x_p[-100:-1]) < 10:
+            if np.std(y_p[-100:-1]) < 0.1 and np.std(x_p[-100:-1]) < 0.1:
                 stopped = True
         if shown == True:
             if trial_duration.getTime() >= 5 or stopped == True:
