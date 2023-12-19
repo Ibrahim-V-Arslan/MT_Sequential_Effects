@@ -1,554 +1,473 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Nov  7 10:35:01 2023
+Created on Sun Dec 17 15:13:08 2023
 
 @author: veoni
 """
 
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Nov 27 09:04:29 2023
 
+@author: veoni
+"""
 
+import os
+# Set the directory of the current script as the working directory
+script_dir = os.path.dirname(os.path.realpath(__file__))
+os.chdir(script_dir)
+import sys
+from psychopy import visual, core, event, gui
 import pandas as pd
-from pseudo_color import mypseudorandrange
-#from Trials import max_trial
-training_trial = 40
-max_trial = 960
-
-#First creating input csv for EXPERIMENT
-
-#Control Condition Generator
-training_control_values = mypseudorandrange(.5, .1, 8, .001, .001, .1, .9, int(max_trial//4))
-
-# For Blue you will do 1 - value above 
-
-#Easy Condition Generator
-training_easy_red_values = mypseudorandrange(.545, .1, 8, .001, .001, .1, .9, int(max_trial/4))
-
-# For Blue you will do 1 - value above 
-
-#Medium Condition Generator
-training_medium_red_values = mypseudorandrange(.53, .1, 8, .001, .001, .1, .9, int(max_trial/4))
-
-# For Blue you will do 1 - value above 
-
-#Hard Condition Generator
-training_hard_red_values = mypseudorandrange(.52, .1, 8, .001, .001, .1, .9, int(max_trial/4))
-
-# For Blue you will do 1 - value above 
+from psychopy.event import Mouse
+from experiment_prerequisite import experiment_df, training_df, training_trial, max_trial
+import math
+import numpy as np
 
 
-control = []
-circle_1 = []
-circle_2 = []
-circle_3 = []
-circle_4 = []
-circle_5 = []
-circle_6 = []
-circle_7 = []
-circle_8 = []
-for z in range((max_trial//4)):
+# Constants
+WIDTH = 1920
+HEIGHT = 1080
+onset_point = -108
+stim_duration = 0.2
+MOVEMENT_RADIUS = 150
+N_CIRCLES = 8
+  
+# Clocks
+clock = core.Clock()
+overall_time = core.Clock()
+
+# Variables
+variables = [
+    'pt_num', 'Age', 'Gender', 'Handedness', 'trial_nbr', 'block_number',
+    'traj_record', 'traj_timestamp', 'stim_traj', 'rt', 'acc', 'choice', 'true_value', 'difficulty', 'c_value', 'trial_duration', 'Experiment Duration',
+]
+
+# GUI screen to collect participant number
+myDlg = gui.Dlg(title="Squircle Task")
+myDlg.addField('Participant Number')
+myDlg.addField('Age:')
+myDlg.addField('Gender:', choices=["Male", "Female", "Other"])
+myDlg.addField('Preferred Hand', choices=["Right", "Left"])
+pt_num = myDlg.show()
+
+if not myDlg.OK or not pt_num[0].isdigit():
+    print("ERROR!!! Participant number is not a digit.")
+    sys.exit()
     
-    circle_1.append(training_control_values[z][0])
-    circle_2.append(training_control_values[z][1])
-    circle_3.append(training_control_values[z][2])
-    circle_4.append(training_control_values[z][3])
-    circle_5.append(training_control_values[z][4])
-    circle_6.append(training_control_values[z][5])
-    circle_7.append(training_control_values[z][6])
-    circle_8.append(training_control_values[z][7])
-for z in range((max_trial//4)):    
-    circle_1.append(training_easy_red_values[z][0])
-    circle_2.append(training_easy_red_values[z][1])
-    circle_3.append(training_easy_red_values[z][2])
-    circle_4.append(training_easy_red_values[z][3])
-    circle_5.append(training_easy_red_values[z][4])
-    circle_6.append(training_easy_red_values[z][5])
-    circle_7.append(training_easy_red_values[z][6])
-    circle_8.append(training_easy_red_values[z][7])
-for z in range((max_trial//4)):    
-    circle_1.append(training_medium_red_values[z][0])
-    circle_2.append(training_medium_red_values[z][1])
-    circle_3.append(training_medium_red_values[z][2])
-    circle_4.append(training_medium_red_values[z][3])
-    circle_5.append(training_medium_red_values[z][4])
-    circle_6.append(training_medium_red_values[z][5])
-    circle_7.append(training_medium_red_values[z][6])
-    circle_8.append(training_medium_red_values[z][7])
-for z in range((max_trial//4)):    
-    circle_1.append(training_hard_red_values[z][0])
-    circle_2.append(training_hard_red_values[z][1])
-    circle_3.append(training_hard_red_values[z][2])
-    circle_4.append(training_hard_red_values[z][3])
-    circle_5.append(training_hard_red_values[z][4])
-    circle_6.append(training_hard_red_values[z][5])
-    circle_7.append(training_hard_red_values[z][6])
-    circle_8.append(training_hard_red_values[z][7])
-    
+# Psychopy Window
+win = visual.Window(size=(WIDTH, HEIGHT), units='pix', fullscr=True,allowGUI=True, color=(100, 100, 100), colorSpace='rgb255')
+win.mouseVisible = True
 
-experiment_df = pd.DataFrame(list(zip(circle_1, circle_2, circle_3, circle_4, circle_5, circle_6, circle_7, circle_8)), columns = ["Circle_1", "Circle_2", "Circle_3",
-                                                                                                                                 "Circle_4", "Circle_5", "Circle_6",
-                                                                                                                                 "Circle_7","Circle_8",])
-
-condition = []
-
-for i in range(max_trial+1):
-    if i <(max_trial//4):
-        condition.append("Control")
-    elif i > (max_trial//4) and i <=((max_trial//4)*2):
-        condition.append("Easy")
-    elif i > ((max_trial//4)*2) and i <=((max_trial//4)*3):
-        condition.append("Medium")
-    elif i > ((max_trial//4)*3) and i <=(max_trial+1):
-        condition.append("Hard")
-
-experiment_df["Condition"] = condition
-        
-stim_color = []
-
-for i in range(max_trial+1):
-    if i < (max_trial//4):
-        stim_color.append("Control")
-    elif i > (max_trial//4) and i <= ((max_trial//4) + ((max_trial//4)//2)):
-        stim_color.append("Red")
-    elif i > ((max_trial//4) + ((max_trial//4)//2)) and i <= ((max_trial//4)*2):
-        stim_color.append("Blue")
-    elif i > ((max_trial//4)*2) and i <=(((max_trial//4)*2) + ((max_trial//4)//2)):
-        stim_color.append("Red")
-    elif i > (((max_trial//4)*2) + ((max_trial//4)//2)) and i <=((max_trial//4)*3):
-        stim_color.append("Blue")
-    elif i > ((max_trial//4)*3) and i <=(((max_trial//4)*3) + ((max_trial//4)//2)):
-        stim_color.append("Red")
-    elif i > (((max_trial//4)*3) + ((max_trial//4)//2)) and i <=(max_trial+1):
-        stim_color.append("Blue")
-   
-experiment_df["Stimulus Color"] = stim_color
-
-#df = df.reindex(columns=['C', 'B', 'A', 'D'])
-
-rgb_1 = []
-g = 0
-xy = 0
-for i in experiment_df["Circle_1"]:
-    if experiment_df["Stimulus Color"].iloc[xy] == 'Red':
-        r = i*255
-        b = ((1-i)*255)
-        rgb_1.append((r,g,b))
-        print('red')
-        xy+=1
-    else:
-        r = ((1-i)*255)
-        b = i*255
-        rgb_1.append((r,g,b))
-        print('blue')
-        xy+=1
-        
-rgb_2 = []
-g = 0
-xy = 0
-for i in experiment_df["Circle_2"]:
-    if experiment_df["Stimulus Color"].iloc[xy] == 'Red':
-        r = i*255
-        b = ((1-i)*255)
-        rgb_2.append((r,g,b))
-        print('red')
-        xy+=1
-    else:
-        r = ((1-i)*255)
-        b = i*255
-        rgb_2.append((r,g,b))
-        print('blue')
-        xy+=1
-
-rgb_3 = []
-g = 0
-xy = 0
-for i in experiment_df["Circle_3"]:
-    if experiment_df["Stimulus Color"].iloc[xy] == 'Red':
-        r = i*255
-        b = ((1-i)*255)
-        rgb_3.append((r,g,b))
-        print('red')
-        xy+=1
-    else:
-        r = ((1-i)*255)
-        b = i*255
-        rgb_3.append((r,g,b))
-        print('blue')
-        xy+=1
+# Stimuli
+fixation = visual.TextStim(win, text="+", height=52, color="black", pos=(0, 320))
+correct_answer = visual.TextStim(win, text="Good", color=(-1, 1, -1), colorSpace='rgb', bold=True, height=26)
+incorrect_answer = visual.TextStim(win, text="Wrong", color=(1.0, -1, -1), colorSpace='rgb', bold=True, height=26)
+control_answer = visual.TextStim(win, text="Control", color="yellow", colorSpace='rgb', bold=True, height=26)
+return_square = visual.Rect(win, width=30, height=30, lineColor='green', fillColor = "white",  pos=(0, -450), colorSpace="rgb255")
 
 
-rgb_4 = []
-g = 0
-xy = 0
-for i in experiment_df["Circle_4"]:
-    if experiment_df["Stimulus Color"].iloc[xy] == 'Red':
-        r = i*255
-        b = ((1-i)*255)
-        rgb_4.append((r,g,b))
-        print('red')
-        xy+=1
-    else:
-        r = ((1-i)*255)
-        b = i*255
-        rgb_4.append((r,g,b))
-        print('blue')
-        xy+=1
+# Move the stimuli upwards and make them smaller 
+start_y = 320
+angles = [(i * (360 / N_CIRCLES)) for i in range(N_CIRCLES)]
+positions = [(MOVEMENT_RADIUS * math.cos(math.radians(angle)),
+              MOVEMENT_RADIUS * math.sin(math.radians(angle)) + start_y) for angle in angles]
 
-rgb_5 = []
-g = 0
-xy = 0
-for i in experiment_df["Circle_5"]:
-    if experiment_df["Stimulus Color"].iloc[xy] == 'Red':
-        r = i*255
-        b = ((1-i)*255)
-        rgb_5.append((r,g,b))
-        print('red')
-        xy+=1
-    else:
-        r = ((1-i)*255)
-        b = i*255
-        rgb_5.append((r,g,b))
-        print('blue')
-        xy+=1
+# Create circles
+circles = [visual.Circle(win, units="pix", size=60, colorSpace="rgb255", pos=pos, fillColor=training_df[f'RGB_{i}'].iloc[0])
+           for i, pos in enumerate(positions, start=1)]
+
+# Option Boxes
+red_pill = visual.Rect(win, width=150, height=150, fillColor="red", pos=(885, 465), autoDraw=False)
+blue_pill = visual.Rect(win, width=150, height=150, fillColor="blue", pos=(-885, 465), autoDraw=False)
+
+# Training Lines
+horizon = visual.Line(win, start=(-960, onset_point), end=(960, onset_point), lineColor='black', autoDraw=False)
+win.flip()
+
+# Mouse
+mouse = Mouse()
+mouse.setVisible(True)
+
+# Instructions
+instr_1 = visual.ImageStim(win, image="./instructions/instruction1.png")
+instr_2 = visual.ImageStim(win, image="./instructions/instruction2.png")
+instr_3 = visual.MovieStim(win, filename = "./instructions/Instruction3.mp4", pos = (0,0), noAudio = True, autoStart = True, loop = False, size = (1920,1080), flipVert=False, flipHoriz=False)
+instr_trn_to_exp = visual.ImageStim(win, image="./instructions/trn_to_exp.png")
+instr_4 = visual.ImageStim(win, image="./instructions/instruction4.png")
+instr_mid = visual.ImageStim(win, image="./instructions/instruction_mid.png")
+instr_end = visual.ImageStim(win, image="./instructions/instruction_end.png")
+warning = visual.ImageStim(win, image="./instructions/warning.png")
 
 
-rgb_6 = []
-g = 0
-xy = 0
-for i in experiment_df["Circle_6"]:
-    if experiment_df["Stimulus Color"].iloc[xy] == 'Red':
-        r = i*255
-        b = ((1-i)*255)
-        rgb_6.append((r,g,b))
-        print('red')
-        xy+=1
-    else:
-        r = ((1-i)*255)
-        b = i*255
-        rgb_6.append((r,g,b))
-        print('blue')
-        xy+=1
-        
-rgb_7 = []
-g = 0
-xy = 0
-for i in experiment_df["Circle_7"]:
-    if experiment_df["Stimulus Color"].iloc[xy] == 'Red':
-        r = i*255
-        b = ((1-i)*255)
-        rgb_7.append((r,g,b))
-        print('red')
-        xy+=1
-    else:
-        r = ((1-i)*255)
-        b = i*255
-        rgb_7.append((r,g,b))
-        print('blue')
-        xy+=1
-        
-rgb_8 = []
-g = 0
-xy = 0
-for i in experiment_df["Circle_8"]:
-    if experiment_df["Stimulus Color"].iloc[xy] == 'Red':
-        r = i*255
-        b = ((1-i)*255)
-        rgb_8.append((r,g,b))
-        print('red')
-        xy+=1
-    else:
-        r = ((1-i)*255)
-        b = i*255
-        rgb_8.append((r,g,b))
-        print('blue')
-        xy+=1
-experiment_df["RGB_1"] = rgb_1
-experiment_df["RGB_2"] = rgb_2
-experiment_df["RGB_3"] = rgb_3
-experiment_df["RGB_4"] = rgb_4
-experiment_df["RGB_5"] = rgb_5
-experiment_df["RGB_6"] = rgb_6
-experiment_df["RGB_7"] = rgb_7
-experiment_df["RGB_8"] = rgb_8
-
-c_value = []
-for i in range(len(experiment_df)):
-    if experiment_df["Stimulus Color"].iloc[i] == "Control":
-        c_value.append(.5)
-    elif experiment_df["Stimulus Color"].iloc[i] == "Red":
-        if experiment_df["Condition"].iloc[i] == "Easy":
-            c_value.append(.545)
-        elif experiment_df["Condition"].iloc[i] == "Medium":
-            c_value.append(.530)
-        elif experiment_df["Condition"].iloc[i] == "Hard":
-            c_value.append(.52)
-    elif experiment_df["Stimulus Color"].iloc[i] == "Blue":
-        if experiment_df["Condition"].iloc[i] == "Easy":
-            c_value.append((1-.545))
-        elif experiment_df["Condition"].iloc[i] == "Medium":
-            c_value.append((1-.530))
-        elif experiment_df["Condition"].iloc[i] == "Hard":
-            c_value.append((1-.52))
-experiment_df["c_value"] = c_value
-experiment_df = experiment_df.sample(frac = 1)
-#experiment_df.to_excel("Input_dataset.xlsx")
-
-
-    
+instr_1.draw()
+win.flip()
+event.waitKeys(keyList=['space'])#if pt presses space --> start exp
+win.flip()
+instr_2.draw()
+win.flip()
+event.waitKeys(keyList=['space'])#if pt presses space --> start exp
+win.flip()
+instr_3.play()
+instr_timer = core.Clock()
+while instr_timer.getTime() < 16:
+    instr_3.draw()
+    win.flip()
+    if event.getKeys(keyList=['space']):
+        break
+# Stop the movie playback
+instr_3.stop()
+#if pt presses space --> start exp
+win.flip()
+instr_4.draw()
+win.flip()
+event.waitKeys(keyList=['space'])#if pt presses space --> start exp
+horizon.autoDraw = True
+red_pill.autoDraw = True
+blue_pill.autoDraw = True
     
 
-
-
-
-#NOW DOING THE SAME THING FOR TRAINING TRIALS
-
-
-
-# For Blue you will do 1 - value above 
-
-#Easy Condition Generator
-training_easy_red_values = mypseudorandrange(.545, .1, 8, .001, .001, .1, .9, int(training_trial/2))
-
-# For Blue you will do 1 - value above 
-
-#Medium Condition Generator
-training_medium_red_values = mypseudorandrange(.530, .1, 8, .001, .001, .1, .9, int(training_trial/2))
-
-# For Blue you will do 1 - value above 
-
-
-
-# For Blue you will do 1 - value above 
-
-
-control = []
-circle_1 = []
-circle_2 = []
-circle_3 = []
-circle_4 = []
-circle_5 = []
-circle_6 = []
-circle_7 = []
-circle_8 = []
-for z in range((training_trial//2)):
+training = True
+while training == True:
+    # Training block loop
+    # Create an empty dictionary for output
+    out_dict = {variable: [] for variable in variables}
     
-
+    for i in range(training_trial):
+        out_dict['pt_num'].append(int(pt_num[0]))
+        out_dict['Age'].append(pt_num[1])
+        out_dict['Gender'].append(pt_num[2])
+        out_dict['Handedness'].append(pt_num[3])
+        out_dict['trial_nbr'].append(i + 1)
+        out_dict['block_number'].append("Training")
+        out_dict['c_value'].append(round(training_df['c_value'].iloc[i],3))
+        mouse_positions = []
+        trajectory_timestamp = []
+        traj_stim_on = []
+        y_p = []
+        x_p = []
+        shown = False
     
-    circle_1.append(training_easy_red_values[z][0])
-    circle_2.append(training_easy_red_values[z][1])
-    circle_3.append(training_easy_red_values[z][2])
-    circle_4.append(training_easy_red_values[z][3])
-    circle_5.append(training_easy_red_values[z][4])
-    circle_6.append(training_easy_red_values[z][5])
-    circle_7.append(training_easy_red_values[z][6])
-    circle_8.append(training_easy_red_values[z][7])
-for z in range((training_trial//2)):    
-    circle_1.append(training_medium_red_values[z][0])
-    circle_2.append(training_medium_red_values[z][1])
-    circle_3.append(training_medium_red_values[z][2])
-    circle_4.append(training_medium_red_values[z][3])
-    circle_5.append(training_medium_red_values[z][4])
-    circle_6.append(training_medium_red_values[z][5])
-    circle_7.append(training_medium_red_values[z][6])
-    circle_8.append(training_medium_red_values[z][7])
+        # Reset the mouse position and variables for each trial
+        core.wait(0.1)
+        fixation.draw()
+        mouse.setPos((0, -450))
+        win.flip()
+        trial_timing = core.Clock()
+        while -1:
+            if event.getKeys(keyList=["escape"]):
+                win.close()
+                core.quit()    
+            x, y = mouse.getPos()
+            mouse_positions.append((int(mouse.getPos()[0]),int(mouse.getPos()[1])))
+            trajectory_timestamp.append(trial_timing.getTime())
+            core.wait(0.001)
     
-
-
-training_df = pd.DataFrame(list(zip(circle_1, circle_2, circle_3, circle_4, circle_5, circle_6, circle_7, circle_8)), columns = ["Circle_1", "Circle_2", "Circle_3",
-                                                                                                                                 "Circle_4", "Circle_5", "Circle_6",
-                                                                                                                                 "Circle_7","Circle_8",])
-
-condition = []
-
-for i in range(training_trial):
-    if i <= (training_trial//2):
-        condition.append("Easy")
-    else:
-        condition.append("Medium")
-
-training_df["Condition"] = condition
-        
-stim_color = []
-
-for i in range(training_trial+1):
-    if i < ((training_trial//2)//2):
-        stim_color.append("Red")
-    elif i > ((training_trial//2)//2) and i <= ((training_trial//4)*2):
-        stim_color.append("Blue")
-    elif i > ((training_trial//4)*2) and i <= (((training_trial//4)*2) + ((training_trial//2)//2)):
-        stim_color.append("Red")
-    elif i > (((training_trial//4)*2) + ((training_trial//2)//2)) and i <= (training_trial):
-        stim_color.append("Blue")
+            if y > onset_point and not shown:
+                fixation.draw()
+                for j, circle in enumerate(circles, start=1):
+                    circle.color = training_df[f'RGB_{j}'].iloc[i]
+                    circle.draw(win)
+                win.flip()
+                rt = core.Clock()
+                start_time = core.Clock()
+                while start_time.getTime() < stim_duration: # Record start time of the loop
+                    core.wait(0.001)
+                    mouse_positions.append((int(mouse.getPos()[0]),int(mouse.getPos()[1])))
+                    trajectory_timestamp.append(trial_timing.getTime())
+                    traj_stim_on.append(mouse_positions[-1])
+                    
+                win.flip()
+                shown = True
+                #rt = core.Clock() was here before
+                if shown == True:
+                    trial_duration = core.Clock()
+            # Each Frame
+            # Begin Experiment
+            stopped = False
+            y_p.append(mouse.getPos()[1])
+            x_p.append(mouse.getPos()[0])
+            if len(y_p) >= 100:
+                if np.std(y_p[-100:-1]) < 10 and np.std(x_p[-100:-1]) < 10:
+                    stopped = True
+                
+            if shown == True:
+                if trial_duration.getTime() >= 5 or stopped == True:
+                    warning.draw()
+                    win.flip()
+                    core.wait(0.75)
+                    win.flip()
+                    out_dict['rt'].append(0)
+                    choice = "NAN"
+                    out_dict["choice"].append('NAN')
+                    out_dict['true_value'].append(training_df["Stimulus Color"].iloc[i])
+                    out_dict["difficulty"].append(training_df["Condition"].iloc[i])
+                    out_dict['acc'].append('NAN')
+                    out_dict['traj_record'].append(mouse_positions)
+                    out_dict['traj_timestamp'].append(trajectory_timestamp)
+                    out_dict['stim_traj'].append(traj_stim_on)
+                    break
+            # Stop the trial when red pill boundary is reached
+            
+            if y >= 390 and x >= 810:
+                out_dict['rt'].append(rt.getTime())
+                choice = "Red"
+                out_dict["choice"].append('Red')
+                out_dict['true_value'].append(training_df["Stimulus Color"].iloc[i])
+                out_dict["difficulty"].append(training_df["Condition"].iloc[i])
+                out_dict['traj_timestamp'].append(trajectory_timestamp)
+                out_dict['stim_traj'].append(traj_stim_on)
     
-   
-training_df["Stimulus Color"] = stim_color
-
-#df = df.reindex(columns=['C', 'B', 'A', 'D'])
-
-rgb_1 = []
-g = 0
-xy = 0
-for i in training_df["Circle_1"]:
-    if training_df["Stimulus Color"].iloc[xy] == 'Red':
-        r = i*255
-        b = ((1-i)*255)
-        rgb_1.append((r,g,b))
-        print('red')
-        xy+=1
-    else:
-        r = ((1-i)*255)
-        b = i*255
-        rgb_1.append((r,g,b))
-        print('blue')
-        xy+=1
+                if training_df["Stimulus Color"].iloc[i] == choice:
+                    out_dict['acc'].append(True)
+                else:
+                    out_dict['acc'].append(False)
+    
+                out_dict["traj_record"].append(mouse_positions)
+    
+                if training:
+                    feedback_text = correct_answer if choice == training_df["Stimulus Color"].iloc[i] else incorrect_answer
+                    win.flip()
+                    feedback_text.draw(win)
+                    win.flip()
+                    core.wait(0.5)
+    
+                shown = False
+                returned = False
+                while not returned:
+                    return_square.draw()
+                    win.flip()
+                    x, y = mouse.getPos()
+                    if -15 <= x <= 15 and -465 <= y <= -435:
+                        returned = True
+                break
+    
+            # Stop the trial when blue pill boundary is reached
+            elif y >= 390 and x <= -810:
+                out_dict['rt'].append(rt.getTime())
+                choice = "Blue"
+                out_dict["choice"].append("Blue")
+                out_dict['true_value'].append(training_df["Stimulus Color"].iloc[i])
+                out_dict["difficulty"].append(training_df["Condition"].iloc[i])
+                out_dict['traj_timestamp'].append(trajectory_timestamp)
+                out_dict['stim_traj'].append(traj_stim_on)
+    
+                if training_df["Stimulus Color"].iloc[i] == choice:
+                    out_dict['acc'].append(True)
+                else:
+                    out_dict['acc'].append(False)
+    
+                out_dict["traj_record"].append(mouse_positions)
+            
+                if training:
+                    feedback_text = correct_answer if choice == training_df["Stimulus Color"].iloc[i] else incorrect_answer
+                    win.flip()
+                    feedback_text.draw(win)
+                    win.flip()
+                    core.wait(0.5)
+                shown = False
+                returned = False
+                while not returned:
+                    return_square.draw()
+                    win.flip()
+                    x, y = mouse.getPos()
+                    if -15 <= x <= 15 and -465 <= y <= -435:
+                        returned = True
+                break
+        out_dict['trial_duration'].append(trial_timing.getTime())
+        out_dict['Experiment Duration'].append(overall_time.getTime()) 
         
-rgb_2 = []
-g = 0
-xy = 0
-for i in training_df["Circle_2"]:
-    if training_df["Stimulus Color"].iloc[xy] == 'Red':
-        r = i*255
-        b = ((1-i)*255)
-        rgb_2.append((r,g,b))
-        print('red')
-        xy+=1
-    else:
-        r = ((1-i)*255)
-        b = i*255
-        rgb_2.append((r,g,b))
-        print('blue')
-        xy+=1
+    training = False
+    if training == False:
+        block_RT = round((sum(out_dict['rt']) / len(out_dict['rt'])),2)
+        block_acc = round((out_dict['acc'].count(True) / (len(out_dict['acc']) - out_dict['acc'].count('Control') )),2)
+        b_rt = visual.TextStim(win, text = str(block_RT), pos = (0, -200), color= (0,0,0), colorSpace='rgb255')
+        b_acc = visual.TextStim(win, text = str(block_acc), pos = (0, -80), color= (0,0,0), colorSpace='rgb255')
+        b_rt.setSize(42)
+        b_acc.setSize(42)
+        if block_acc < 0.6:
+            training = True
+        else:
+            instr_trn_to_exp.draw()
+            b_rt.draw()
+            b_acc.draw()
+            win.flip()
+            event.waitKeys(keyList=["escape", 'space'])
+horizon.autoDraw = False
+# Main experiment loop
+for i in range(max_trial):
+    out_dict['pt_num'].append(int(pt_num[0]))
+    out_dict['Age'].append(pt_num[1])
+    out_dict['Gender'].append(pt_num[2])
+    out_dict['Handedness'].append(pt_num[3])
+    out_dict['c_value'].append(round(experiment_df['c_value'].iloc[i],3))
 
-rgb_3 = []
-g = 0
-xy = 0
-for i in training_df["Circle_3"]:
-    if training_df["Stimulus Color"].iloc[xy] == 'Red':
-        r = i*255
-        b = ((1-i)*255)
-        rgb_3.append((r,g,b))
-        print('red')
-        xy+=1
-    else:
-        r = ((1-i)*255)
-        b = i*255
-        rgb_3.append((r,g,b))
-        print('blue')
-        xy+=1
+    if event.getKeys(keyList=["escape"]):
+        win.close()
+        core.quit()
 
+    # Determine block number
+    block_percentage = (i + 1) / max_trial
+    block_number = f"Block {math.ceil(block_percentage * 10)}"
+    out_dict['block_number'].append(block_number)
 
-rgb_4 = []
-g = 0
-xy = 0
-for i in training_df["Circle_4"]:
-    if training_df["Stimulus Color"].iloc[xy] == 'Red':
-        r = i*255
-        b = ((1-i)*255)
-        rgb_4.append((r,g,b))
-        print('red')
-        xy+=1
-    else:
-        r = ((1-i)*255)
-        b = i*255
-        rgb_4.append((r,g,b))
-        print('blue')
-        xy+=1
+    # Display block number
+    b_num = visual.TextStim(win, text=str(math.ceil(block_percentage * 10)), pos=(100, 165), color=(0, 0, 0), colorSpace='rgb255', bold=True)
+    b_num.setSize(42)
 
-rgb_5 = []
-g = 0
-xy = 0
-for i in training_df["Circle_5"]:
-    if training_df["Stimulus Color"].iloc[xy] == 'Red':
-        r = i*255
-        b = ((1-i)*255)
-        rgb_5.append((r,g,b))
-        print('red')
-        xy+=1
-    else:
-        r = ((1-i)*255)
-        b = i*255
-        rgb_5.append((r,g,b))
-        print('blue')
-        xy+=1
+    if math.isclose(block_percentage, 0.1) or math.isclose(block_percentage, 0.2) or math.isclose(block_percentage, 0.3) \
+            or math.isclose(block_percentage, 0.4) or math.isclose(block_percentage, 0.5) \
+            or math.isclose(block_percentage, 0.6) or math.isclose(block_percentage, 0.7) \
+            or math.isclose(block_percentage, 0.8) or math.isclose(block_percentage, 0.9):
+        instr_mid.draw()
+        block_RT = round((sum(out_dict['rt']) / len(out_dict['rt'])), 2)
+        block_acc = round((out_dict['acc'].count(True) / (len(out_dict['acc']) - out_dict['acc'].count('Control') )),2)
+        b_rt = visual.TextStim(win, text=str(block_RT), pos=(0, -250), color=(0, 0, 0), colorSpace='rgb255')
+        b_acc = visual.TextStim(win, text=str(block_acc), pos=(0, -90), color=(0, 0, 0), colorSpace='rgb255')
+        b_rt.setSize(42)
+        b_acc.setSize(42)
+        b_num.setSize(42)
+        b_num.draw()
+        b_rt.draw()
+        b_acc.draw()
+        win.flip()
+        event.waitKeys(keyList=["escape", 'space'])
 
+    # Set up trial
+    out_dict['trial_nbr'].append(i + 1)
+    mouse_positions = []
+    traj_stim_on = []
+    trajectory_timestamp = []
+    shown = False
 
-rgb_6 = []
-g = 0
-xy = 0
-for i in training_df["Circle_6"]:
-    if training_df["Stimulus Color"].iloc[xy] == 'Red':
-        r = i*255
-        b = ((1-i)*255)
-        rgb_6.append((r,g,b))
-        print('red')
-        xy+=1
-    else:
-        r = ((1-i)*255)
-        b = i*255
-        rgb_6.append((r,g,b))
-        print('blue')
-        xy+=1
-        
-rgb_7 = []
-g = 0
-xy = 0
-for i in training_df["Circle_7"]:
-    if training_df["Stimulus Color"].iloc[xy] == 'Red':
-        r = i*255
-        b = ((1-i)*255)
-        rgb_7.append((r,g,b))
-        print('red')
-        xy+=1
-    else:
-        r = ((1-i)*255)
-        b = i*255
-        rgb_7.append((r,g,b))
-        print('blue')
-        xy+=1
-        
-rgb_8 = []
-g = 0
-xy = 0
-for i in training_df["Circle_8"]:
-    if training_df["Stimulus Color"].iloc[xy] == 'Red':
-        r = i*255
-        b = ((1-i)*255)
-        rgb_8.append((r,g,b))
-        print('red')
-        xy+=1
-    else:
-        r = ((1-i)*255)
-        b = i*255
-        rgb_8.append((r,g,b))
-        print('blue')
-        xy+=1
-training_df["RGB_1"] = rgb_1
-training_df["RGB_2"] = rgb_2
-training_df["RGB_3"] = rgb_3
-training_df["RGB_4"] = rgb_4
-training_df["RGB_5"] = rgb_5
-training_df["RGB_6"] = rgb_6
-training_df["RGB_7"] = rgb_7
-training_df["RGB_8"] = rgb_8
+    # Reset the mouse position and variables for each trial
+    core.wait(0.1)
+    fixation.draw()
+    mouse.setPos((0, -450))
+    win.flip()
 
-c_value = []
-for i in range(len(training_df)):
-    if training_df["Stimulus Color"].iloc[i] == "Control":
-        c_value.append(.5)
-    elif training_df["Stimulus Color"].iloc[i] == "Red":
-        if training_df["Condition"].iloc[i] == "Easy":
-            c_value.append(.545)
-        elif training_df["Condition"].iloc[i] == "Medium":
-            c_value.append(.530)
-        elif training_df["Condition"].iloc[i] == "Hard":
-            c_value.append(.52)
-    elif training_df["Stimulus Color"].iloc[i] == "Blue":
-        if training_df["Condition"].iloc[i] == "Easy":
-            c_value.append((1-.545))
-        elif training_df["Condition"].iloc[i] == "Medium":
-            c_value.append((1-.530))
-        elif training_df["Condition"].iloc[i] == "Hard":
-            c_value.append((1-.52))
-training_df["c_value"] = c_value
-training_df = training_df.sample(frac = 1)
-#training_df.to_csv("Input_dataset.csv")
-        
+    while -1:
+        if event.getKeys(keyList=["escape"]):
+            win.close()
+            core.quit()
+
+        x, y = mouse.getPos()
+        mouse_positions.append((int(mouse.getPos()[0]),int(mouse.getPos()[1])))
+        trajectory_timestamp.append(trial_timing.getTime())
+        core.wait(0.001)
+
+        if y > onset_point and not shown:
+            fixation.draw()
+            for j, circle in enumerate(circles, start=1):
+                circle.color = experiment_df[f'RGB_{j}'].iloc[i]
+                circle.draw(win)
+            win.flip()
+
+            start_time = core.Clock()
+            while start_time.getTime() < stim_duration:
+                core.wait(0.001)
+                mouse_positions.append((int(mouse.getPos()[0]),int(mouse.getPos()[1])))
+                trajectory_timestamp.append(trial_timing.getTime())
+                traj_stim_on.append(mouse_positions[-1])
+            win.flip()
+            shown = True
+            rt = core.Clock()
+            if shown == True:
+                trial_duration = core.Clock()
+        stopped = False
+        y_p.append(mouse.getPos()[1])
+        x_p.append(mouse.getPos()[0])
+        if len(y_p) >= 100:
+            if np.std(y_p[-100:-1]) < 10 and np.std(x_p[-100:-1]) < 10:
+                stopped = True
+        if shown == True:
+            if trial_duration.getTime() >= 5 or stopped == True:
+                warning.draw()
+                win.flip()
+                core.wait(0.75)
+                win.flip()
+                out_dict['rt'].append(0)
+                choice = "NAN"
+                out_dict["choice"].append('NAN')
+                out_dict['true_value'].append(experiment_df["Stimulus Color"].iloc[i])
+                out_dict["difficulty"].append(experiment_df["Condition"].iloc[i])
+                out_dict['acc'].append('NAN')
+                out_dict['traj_record'].append(mouse_positions)
+                out_dict['traj_timestamp'].append(trajectory_timestamp)
+                out_dict['stim_traj'].append(traj_stim_on)
+                break
+        # Stop the trial when red pill boundary is reached
+        if y >= 390 and x >= 810:
+            out_dict['rt'].append(rt.getTime())
+            choice = "Red"
+            out_dict["choice"].append('Red')
+            out_dict['true_value'].append(experiment_df["Stimulus Color"].iloc[i])
+            out_dict["difficulty"].append(experiment_df["Condition"].iloc[i])
+            out_dict['traj_timestamp'].append(trajectory_timestamp)
+            out_dict['stim_traj'].append(traj_stim_on)
+
+            if experiment_df["Stimulus Color"].iloc[i] == choice:
+                out_dict['acc'].append(True)
+            elif experiment_df["Stimulus Color"].iloc[i] == "Control":
+                out_dict['acc'].append("Control")
+            else:
+                out_dict['acc'].append(False)
+
+            out_dict["traj_record"].append(mouse_positions)
+
+            shown = False
+            returned = False
+            while not returned:
+                return_square.draw()
+                win.flip()
+                x, y = mouse.getPos()
+                if -15 <= x <= 15 and -465 <= y <= -435:
+                    returned = True
+            break
+
+        # Stop the trial when blue pill boundary is reached
+        elif y >= 390 and x <= -810:
+            out_dict['rt'].append(rt.getTime())
+            choice = "Blue"
+            out_dict["choice"].append("Blue")
+            out_dict['true_value'].append(experiment_df["Stimulus Color"].iloc[i])
+            out_dict["difficulty"].append(experiment_df["Condition"].iloc[i])
+            out_dict['traj_timestamp'].append(trajectory_timestamp)
+            out_dict['stim_traj'].append(traj_stim_on)
+
+            if experiment_df["Stimulus Color"].iloc[i] == choice:
+                out_dict['acc'].append(True)
+            elif experiment_df["Stimulus Color"].iloc[i] == "Control":
+                out_dict['acc'].append("Control")
+            else:
+                out_dict['acc'].append(False)
+
+            out_dict["traj_record"].append(mouse_positions)
+
+            shown = False
+            returned = False
+            while not returned:
+                return_square.draw()
+                win.flip()
+                x, y = mouse.getPos()
+                if -15 <= x <= 15 and -465 <= y <= -435:
+                    returned = True
+            break
+    out_dict['trial_duration'].append(trial_timing.getTime())
+    out_dict['Experiment Duration'].append(overall_time.getTime())
+
+instr_end.draw(win)
+win.flip()
+event.waitKeys(keyList=['space'])
+win.close()
+
+# Data Output
+out_df = pd.DataFrame.from_dict(out_dict)
+out_df.to_excel(f'./data/results_{pt_num[0]}.xlsx', index=False)
+out_df.to_csv(f'./data/results_{pt_num[0]}.csv', index=False)
+experiment_df.to_excel(f'./data/input_dataset_{pt_num[0]}.xlsx')
+out_df.to_pickle(f'./data/results_{pt_num[0]}_df.pkl')
+out_df.to_json(f'./data/results_{pt_num[0]}_df.json')
+
+# Quit
+core.quit()
