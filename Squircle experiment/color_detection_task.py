@@ -56,7 +56,7 @@ if not myDlg.OK or not pt_num[0].isdigit():
     sys.exit()
     
 # Psychopy Window
-win = visual.Window(size=(WIDTH, HEIGHT), units='pix', fullscr=True,allowGUI=True, color=(100, 100, 100), colorSpace='rgb255')
+win = visual.Window(size=(WIDTH, HEIGHT), units='pix', fullscr=False,allowGUI=True, color=(100, 100, 100), colorSpace='rgb255')
 win.mouseVisible = True
 
 # Stimuli
