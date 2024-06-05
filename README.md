@@ -1,5 +1,7 @@
-# Mouse-Tracking-Experiment_DLAB
-This is the work of my internship @ Desenderlab KU Leuven.
+# MT_Sequential_Effects
+**This is the work of my internship @ Desenderlab KU Leuven.**
+In this study, we have investigated the influence of sequential effects as well as the evolution of sequential effects within a trial.
+In short, we observed conventional experiments showcase the static influence of sequential effects in a trial while the mouse tracking paradigm can shed more light on the everchanging influence of sequential effects within a trial.
 ## Scripts:
 ### 1_downsampler.ipynb
 
