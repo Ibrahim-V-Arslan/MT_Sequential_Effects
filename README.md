@@ -1,5 +1,5 @@
 # Mouse-Tracking-Experiment_DLAB
-
+This is the work of my internship @ Desenderlab KU Leuven.
 ## Scripts:
 ### 1_downsampler.ipynb
 
