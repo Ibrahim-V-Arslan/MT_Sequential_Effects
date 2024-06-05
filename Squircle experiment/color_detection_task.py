@@ -29,7 +29,7 @@ import numpy as np
 WIDTH = 1920
 HEIGHT = 1080
 onset_point = -108
-stim_duration = 0.2
+stim_duration = 5
 MOVEMENT_RADIUS = 150
 N_CIRCLES = 8
   
